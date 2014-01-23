@@ -75,7 +75,6 @@ extern bool postprocess_filter_dealias;
 
 extern int AutoDMAPlayRate[2];
 
-extern u32 OutputModule;
 extern int SndOutLatencyMS;
 
 extern wchar_t dspPlugin[];

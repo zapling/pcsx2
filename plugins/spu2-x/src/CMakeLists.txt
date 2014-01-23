@@ -51,8 +51,9 @@ set(spu2xSources
     RegLog.cpp
     RegTable.cpp
     Reverb.cpp
+    SampleConverters.cpp
+    SndBuffer.cpp
     SndOut.cpp
-    SndOut_Portaudio.cpp
     spu2freeze.cpp
     Spu2replay.cpp
     spu2sys.cpp
@@ -73,6 +74,8 @@ set(spu2xHeaders
     Mixer.h
     PS2E-spu2.h
     regs.h
+    SampleConverters.h
+    SndBuffer.h
     SndOut.h
     spdif.h
     Spu2replay.h
@@ -83,7 +86,6 @@ set(spu2xHeaders
 # spu2x Linux sources
 set(spu2xLinuxSources
     Linux/AboutBox.cpp
-    Linux/Alsa.cpp
     Linux/CfgHelpers.cpp
     Linux/Config.cpp
     Linux/ConfigDebug.cpp
@@ -92,7 +94,6 @@ set(spu2xLinuxSources
 
 # spu2x Linux headers
 set(spu2xLinuxHeaders
-    Linux/Alsa.h
     Linux/Config.h
     Linux/Dialogs.h)
 

@@ -272,7 +272,6 @@
     <ClInclude Include="..\spu2replay.h" />
     <ClInclude Include="..\Lowpass.h" />
     <ClInclude Include="..\SndOut.h" />
-    <ClInclude Include="..\Linux\Alsa.h" />
     <ClInclude Include="..\spdif.h" />
     <ClInclude Include="..\defs.h" />
     <ClInclude Include="..\Dma.h" />
@@ -350,16 +349,7 @@
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Default</CompileAs>
     </ClCompile>
     <ClCompile Include="..\Timestretcher.cpp" />
-    <ClCompile Include="SndOut_DSound.cpp" />
-    <ClCompile Include="SndOut_waveOut.cpp" />
-    <ClCompile Include="SndOut_XAudio2.cpp" />
-    <ClCompile Include="..\Linux\Alsa.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugStrict|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Devel|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\SndOut_Portaudio.cpp" />
+    <ClCompile Include="..\Portaudio.cpp" />
     <ClCompile Include="..\dma.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DebugStrict|Win32'">
       </PrecompiledHeader>

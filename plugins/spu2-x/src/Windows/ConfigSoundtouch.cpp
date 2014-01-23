@@ -48,6 +48,26 @@ static void ClampValues()
 	Clampify( OverlapMS, Overlap_Min, Overlap_Max );
 }
 
+static void UpdateSlidersText(const HWND hWnd)
+{
+	SendDialogMsg( hWnd, IDC_SEQLEN_SLIDER, TBM_SETPOS, TRUE, SequenceLenMS );
+	SendDialogMsg( hWnd, IDC_SEEKWIN_SLIDER, TBM_SETPOS, TRUE, SeekWindowMS );
+	SendDialogMsg( hWnd, IDC_OVERLAP_SLIDER, TBM_SETPOS, TRUE, OverlapMS );
+
+	SendMessage(hWnd, WM_HSCROLL, 0, (LPARAM)GetDlgItem(hWnd, IDC_SEQLEN_SLIDER));
+	SendMessage(hWnd, WM_HSCROLL, 0, (LPARAM)GetDlgItem(hWnd, IDC_SEEKWIN_SLIDER));
+	SendMessage(hWnd, WM_HSCROLL, 0, (LPARAM)GetDlgItem(hWnd, IDC_OVERLAP_SLIDER));
+}
+
+static void SetSliderText(const HWND hWnd, const int SLIDER_IDC, const int TEXT_IDC)
+{
+	const int value = (int)SendDialogMsg( hWnd, SLIDER_IDC, TBM_GETPOS, 0, 0 );
+
+	wchar_t text[8];
+	swprintf(text, 3, L"%d", value);
+	SetDlgItemText(hWnd, TEXT_IDC, text);
+}
+
 void SoundtouchCfg::ReadSettings()
 {
 	SequenceLenMS	= CfgReadInt( L"SOUNDTOUCH", L"SequenceLengthMS", 30 );
@@ -80,9 +100,7 @@ BOOL CALLBACK SoundtouchCfg::DialogProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM
 			INIT_SLIDER( IDC_SEEKWIN_SLIDER, SeekWindow_Min, SeekWindow_Max, 5, 2, 1 );
 			INIT_SLIDER( IDC_OVERLAP_SLIDER, Overlap_Min, Overlap_Max, 3, 2, 1 );
 
-			SendDialogMsg( hWnd, IDC_SEQLEN_SLIDER, TBM_SETPOS, TRUE, SequenceLenMS );
-			SendDialogMsg( hWnd, IDC_SEEKWIN_SLIDER, TBM_SETPOS, TRUE, SeekWindowMS );
-			SendDialogMsg( hWnd, IDC_OVERLAP_SLIDER, TBM_SETPOS, TRUE, OverlapMS );
+			UpdateSlidersText(hWnd);
 		}
 
 		case WM_COMMAND:
@@ -104,9 +122,7 @@ BOOL CALLBACK SoundtouchCfg::DialogProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM
 				SeekWindowMS	= 20;
 				OverlapMS		= 10;
 
-				SendDialogMsg( hWnd, IDC_SEQLEN_SLIDER, TBM_SETPOS, TRUE, SequenceLenMS );
-				SendDialogMsg( hWnd, IDC_SEEKWIN_SLIDER, TBM_SETPOS, TRUE, SeekWindowMS );
-				SendDialogMsg( hWnd, IDC_OVERLAP_SLIDER, TBM_SETPOS, TRUE, OverlapMS );
+				UpdateSlidersText(hWnd);
 			}
 			else if( wmId == IDCANCEL )
 			{
@@ -115,7 +131,16 @@ BOOL CALLBACK SoundtouchCfg::DialogProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM
 		break;
 
 		case WM_HSCROLL:
-			DoHandleScrollMessage( hWnd, wParam, lParam );
+			{
+				if((HWND)lParam == GetDlgItem(hWnd, IDC_SEQLEN_SLIDER)) 
+					SetSliderText(hWnd, IDC_SEQLEN_SLIDER, IDC_SEQLEN_TXT);
+				
+				else  if((HWND)lParam == GetDlgItem(hWnd, IDC_SEEKWIN_SLIDER)) 
+					SetSliderText(hWnd, IDC_SEEKWIN_SLIDER, IDC_SEEKWIN_TXT);
+
+				else if((HWND)lParam == GetDlgItem(hWnd, IDC_OVERLAP_SLIDER)) 
+					SetSliderText(hWnd, IDC_OVERLAP_SLIDER, IDC_OVERLAP_TXT);
+			}
 		break;
 
 		default:

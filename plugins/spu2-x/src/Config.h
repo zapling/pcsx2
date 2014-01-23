@@ -70,9 +70,10 @@ extern bool postprocess_filter_dealias;
 
 extern int dplLevel;
 
-extern u32 OutputModule;
 extern int SndOutLatencyMS;
 extern int SynchMode;
+
+extern bool DisableOutput;
 
 #ifndef __LINUX__
 extern wchar_t dspPlugin[];

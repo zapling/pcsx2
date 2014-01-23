@@ -51,7 +51,7 @@ float SndBuffer::GetStatusPct()
 	// Get the buffer status of the output driver too, so that we can
 	// obtain a more accurate overall buffer status.
 
-	int drvempty = mods[OutputModule]->GetEmptySampleCount(); // / 2;
+	int drvempty = SndOut::GetEmptySampleCount(); // / 2;
 
 	//ConLog( "Data %d >>> driver: %d   predict: %d\n", m_data, drvempty, m_predictData );
 
