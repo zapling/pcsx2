@@ -12,7 +12,7 @@
  *  You should have received a copy of the GNU General Public License along with PCSX2.
  *  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef __x86_64__
+#ifdef __x86_64__
 #include "PrecompiledHeader.h"
 
 #include "Common.h"
@@ -83,7 +83,7 @@ protected:
 ////////////////////////////////////////////////////////////////
 // Static Private Variables - R5900 Dynarec
 
-#define X86
+#define X64
 static const int RECCONSTBUF_SIZE = 16384 * 2; // 64 bit consts in 32 bit units
 
 static RecompiledCodeReserve* recMem = NULL;
@@ -660,7 +660,8 @@ static void recAlloc()
 	}
 
     if( recConstBuf == NULL )
-		recConstBuf = (u32*) _aligned_malloc( RECCONSTBUF_SIZE * sizeof(*recConstBuf), 16 );
+		recConstBuf = (u32*) _aligned_malloc( RECCONSTBUF_SIZE * 2 * sizeof(*recConstBuf), 16 ); //allocate twice as much since we have 64bit pointers now, using 64bit directly would
+                                                                                                // perform better though I think --3kinox
 
 	if( recConstBuf == NULL )
 		throw Exception::OutOfMemory( L"R5900-32 SIMD Constants Buffer" );
@@ -1072,7 +1073,8 @@ void iFlushCall(int flushtype)
 		_flushConstRegs();
 
 	if (x86FpuState==MMX_STATE) {
-		EMMS();
+		if (x86caps.has3DNOWInstructionExtensions) FEMMS();
+		else EMMS();
 		x86FpuState=FPU_STATE;
 	}
 }
@@ -1555,7 +1557,6 @@ void recompileNextInstruction(int delayslot)
 						DevCon.Warning("Possible old value used in COP2 code");
 						for (u32 i = s_pCurBlockEx->startpc; i < s_nEndBlock; i += 4)
 						{
-							disasm = "";
 							disR5900Fasm(disasm, memRead32(i), i,false);
 							DevCon.Warning("%s%08X %s", i == pc - 4 ? "*" : i == p ? "=" : " ", memRead32(i), disasm.c_str());
 						}
@@ -1739,17 +1740,9 @@ static void __fastcall recRecompile( const u32 startpc )
 		xCALL(PreBlockCheck);
 	}
 
-	if (EmuConfig.Gamefixes.GoemonTlbHack) {
-		if (pc == 0x33ad48 || pc == 0x35060c) {
-			// 0x33ad48 and 0x35060c are the return address of the function (0x356250) that populate the TLB cache
-			xCALL(GoemonPreloadTlb);
-		} else if (pc == 0x3563b8) {
-			// Game will unmap some virtual addresses. If a constant address were hardcoded in the block, we would be in a bad situation.
-			AtomicExchange( eeRecNeedsReset, true );
-			// 0x3563b8 is the start address of the function that invalidate entry in TLB cache
-			MOV32MtoR(ECX, (uptr)&cpuRegs.GPR.n.a0.UL[ 0 ] );
-			xCALL(GoemonUnloadTlb);
-		}
+	// 0x33ad48 is the return address of the function that populate the TLB cache
+	if (pc == 0x33ad48 && EmuConfig.Gamefixes.GoemonTlbHack) {
+		xCALL(GoemonPreloadTlb);
 	}
 
 	// go until the next branch
@@ -1972,10 +1965,8 @@ StartRecomp:
 
 		for(i = startpc; i < s_nEndBlock; i += 4) {
 
-#ifndef DISABLE_SVU
 			// superVU hack: it needs vucycles, for some reason. >_<
 			extern int vucycle;
-#endif
 
 			g_pCurInstInfo++;
 			cpuRegs.code = *(u32*)PSM(i);
@@ -1985,9 +1976,7 @@ StartRecomp:
 
 				if( !usecop2 ) {
 					// init
-#ifndef DISABLE_SVU
 					vucycle = 0;
-#endif
 					usecop2 = 1;
 				}
 
@@ -1996,11 +1985,9 @@ StartRecomp:
 				continue;
 			}
 
-#ifndef DISABLE_SVU
 			// fixme - This should be based on the cycle count of the current EE
 			// instruction being analyzed.
 			if( usecop2 ) vucycle++;
-#endif
 
 		}
 		// This *is* important because g_pCurInstInfo is checked a bit later on and
