@@ -104,7 +104,7 @@ static EEINST* s_psaveInstInfo = NULL;
 static u32 s_savenBlockCycles = 0;
 
 #ifdef PCSX2_DEBUG
-static u32 dumplog = 0;
+static const u32 dumplog = 0;
 #else
 #define dumplog 0
 #endif
@@ -1672,15 +1672,19 @@ static void __fastcall recRecompile( const u32 startpc )
 	xSetPtr( recPtr );
 	recPtr = xGetAlignedCallTarget();
 
+#ifdef PCSX2_DEBUG
 	if (0x8000d618 == startpc)
 		DbgCon.WriteLn("Compiling block @ 0x%08x", startpc);
-	
+#endif
+
 	s_pCurBlock = PC_GETBLOCK(startpc);
 
 	pxAssert(s_pCurBlock->GetFnptr() == (uptr)JITCompile);
 
+#ifdef PCSX2_DEBUG
 	s_pCurBlockEx = recBlocks.Get(HWADDR(startpc));
 	pxAssert(!s_pCurBlockEx || s_pCurBlockEx->startpc != HWADDR(startpc));
+#endif
 
 	s_pCurBlockEx = recBlocks.New(HWADDR(startpc), (uptr)recPtr);
 
