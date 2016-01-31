@@ -175,6 +175,12 @@ const u32 u32_FMIN = 0x00800000u;
 	}
 #endif
 
+#define C_cond_S_d(cond) {  \
+	_ContVal_ = ( _FsVald_ cond _FtVald_ ) ?  \
+	( _ContVal_ | FPUflagC ) :  \
+	( _ContVal_ & ~FPUflagC );  \
+}
+
 // Conditional Branch
 #define BC1(cond)                               \
    if ( ( _ContVal_ & FPUflagC ) cond 0 ) {   \
@@ -379,23 +385,23 @@ void BC1TL() {
 
 void C_EQ() {
 #ifdef DOUBLE_FPU
-	pxAssert(0);
+	upcast_reg(_FsRef_);
+	upcast_reg(_FtRef_);
+	C_cond_S_d(==);
 #else
 	C_cond_S(==);
 #endif
 }
 
 void C_F() {
-#ifdef DOUBLE_FPU
-	pxAssert(0);
-#else
 	clearFPUFlags( FPUflagC ); //clears C regardless
-#endif
 }
 
 void C_LE() {
 #ifdef DOUBLE_FPU
-	pxAssert(0);
+	upcast_reg(_FsRef_);
+	upcast_reg(_FtRef_);
+	C_cond_S_d(<=);
 #else
 	C_cond_S(<=);
 #endif
@@ -403,7 +409,9 @@ void C_LE() {
 
 void C_LT() {
 #ifdef DOUBLE_FPU
-	pxAssert(0);
+	upcast_reg(_FsRef_);
+	upcast_reg(_FtRef_);
+	C_cond_S_d(<);
 #else
 	C_cond_S(<);
 #endif
@@ -429,7 +437,8 @@ void CTC1() {
 
 void CVT_S() {
 #ifdef DOUBLE_FPU
-	pxAssert(0);
+	_FdVald_ = (double)_FsValSl_;
+	downcast_reg(_FdRef_, 0);
 #else
 	_FdValf_ = (float)_FsValSl_;
 	_FdValf_ = fpuDouble( _FdValUl_ );
@@ -438,12 +447,11 @@ void CVT_S() {
 
 void CVT_W() {
 #ifdef DOUBLE_FPU
-	pxAssert(0);
-#else
+	fpuRegs.fpr[_Rs_].IsDoubleCached = 0;
+#endif
 	if ( ( _FsValUl_ & 0x7F800000 ) <= 0x4E800000 ) { _FdValSl_ = (s32)_FsValf_; }
 	else if ( ( _FsValUl_ & 0x80000000 ) == 0 ) { _FdValUl_ = 0x7fffffff; }
 	else { _FdValUl_ = 0x80000000; }
-#endif
 }
 
 void DIV_S() {
