@@ -152,6 +152,11 @@ const u32 u32_FMIN = 0x00800000u;
 	for specific instructions... I'm just setting them to clear when the Instruction Set Manual
 	says to... (cottonvibes)
 */
+/* Gregory: In my opinion there are 2 classes of operational flags O/U and D/I.
+   The former are likely cleared for most instructions (FMA) but
+   rsqrt/sqrt/div. The latter are likely cleared for rsqrt/sqrt/div. The FPU
+   likely contains a FDIV + a FMAC unit like VU.
+*/
 #define clearFPUFlags(cFlags) {  \
 	_ContVal_ &= ~( cFlags ) ;  \
 }
@@ -359,6 +364,7 @@ void ABS_S() {
 }
 
 void ADD_S() {
+	clearFPUFlags( FPUflagO | FPUflagU );
 #ifdef DOUBLE_FPU
 	upcast_reg(_FtRef_);
 	upcast_reg(_FsRef_);
@@ -374,6 +380,7 @@ void ADD_S() {
 }
 
 void ADDA_S() {
+	clearFPUFlags( FPUflagO | FPUflagU );
 #ifdef DOUBLE_FPU
 	upcast_reg(_FtRef_);
 	upcast_reg(_FsRef_);
@@ -477,6 +484,7 @@ void CVT_W() {
 }
 
 void DIV_S() {
+	clearFPUFlags( FPUflagD | FPUflagI );
 #ifdef DOUBLE_FPU
 	if (_FtIsZero_) { // division by 0
 		if (_FsIsZero_) { // but operand is 0
@@ -511,6 +519,7 @@ void DIV_S() {
 	method provides a similar outcome and is faster. (cottonvibes)
 */
 void MADD_S() {
+	clearFPUFlags( FPUflagO | FPUflagU );
 #ifdef DOUBLE_FPU
 	upcast_reg(_FARef_);
 	upcast_reg(_FtRef_);
@@ -532,6 +541,7 @@ void MADD_S() {
 }
 
 void MADDA_S() {
+	clearFPUFlags( FPUflagO | FPUflagU );
 #ifdef DOUBLE_FPU
 	upcast_reg(_FARef_);
 	upcast_reg(_FtRef_);
@@ -619,6 +629,7 @@ void MOV_S() {
 }
 
 void MSUB_S() {
+	clearFPUFlags( FPUflagO | FPUflagU );
 #ifdef DOUBLE_FPU
 	upcast_reg(_FARef_);
 	upcast_reg(_FtRef_);
@@ -639,6 +650,7 @@ void MSUB_S() {
 }
 
 void MSUBA_S() {
+	clearFPUFlags( FPUflagO | FPUflagU );
 #ifdef DOUBLE_FPU
 	upcast_reg(_FARef_);
 	upcast_reg(_FtRef_);
@@ -664,6 +676,7 @@ void MTC1() {
 }
 
 void MUL_S() {
+	clearFPUFlags( FPUflagO | FPUflagU );
 #ifdef DOUBLE_FPU
 	upcast_reg(_FtRef_);
 	upcast_reg(_FsRef_);
@@ -679,6 +692,7 @@ void MUL_S() {
 }
 
 void MULA_S() {
+	clearFPUFlags( FPUflagO | FPUflagU );
 #ifdef DOUBLE_FPU
 	upcast_reg(_FtRef_);
 	upcast_reg(_FsRef_);
@@ -701,11 +715,12 @@ void NEG_S() {
 	_FdRef_.UL ^= 0x80000000;
 #else
 	_FdValUl_  = (_FsValUl_ ^ 0x80000000);
-	clearFPUFlags( FPUflagO | FPUflagU );
 #endif
+	clearFPUFlags( FPUflagO | FPUflagU );
 }
 
 void RSQRT_S() {
+	clearFPUFlags( FPUflagD | FPUflagI );
 #ifdef DOUBLE_FPU
 	if (_FtIsZero_) { // division by 0
 		_ContVal_ |= FPUflagD | FPUflagSD;
@@ -747,6 +762,7 @@ void RSQRT_S() {
 }
 
 void SQRT_S() {
+	clearFPUFlags( FPUflagD | FPUflagI );
 	// Note spec says that sqrt(-0) == -0 but tests show the contrary. Who trust !
 #ifdef DOUBLE_FPU
 	upcast_reg(_FtRef_);
@@ -768,11 +784,10 @@ void SQRT_S() {
 	} else
 		_FdValf_ = sqrt( fpuDouble( _FtValUl_ ) ); // If Ft is Positive
 #endif
-
-	clearFPUFlags( FPUflagD );
 }
 
 void SUB_S() {
+	clearFPUFlags( FPUflagO | FPUflagU );
 #ifdef DOUBLE_FPU
 	upcast_reg(_FtRef_);
 	upcast_reg(_FsRef_);
@@ -789,6 +804,7 @@ void SUB_S() {
 }
 
 void SUBA_S() {
+	clearFPUFlags( FPUflagO | FPUflagU );
 #ifdef DOUBLE_FPU
 	upcast_reg(_FtRef_);
 	upcast_reg(_FsRef_);
