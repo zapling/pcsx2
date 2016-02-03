@@ -139,6 +139,7 @@ template< typename T > void xWrite( T val );
 	//
 	enum JccComparisonType
 	{
+		Jcc_NOP    			= -3,
 		Jcc_Unknown			= -2,
 		Jcc_Unconditional	= -1,
 		Jcc_Overflow		= 0x0,

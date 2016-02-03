@@ -145,6 +145,7 @@ xForwardJumpBase::xForwardJumpBase( uint opsize, JccComparisonType cctype )
 {
 	pxAssert( opsize == 1 || opsize == 4 );
 	pxAssertDev( cctype != Jcc_Unknown, "Invalid ForwardJump conditional type." );
+	if (cctype == Jcc_NOP) return;
 
 	BasePtr = (s8*)xGetPtr() +
 		((opsize == 1) ? 2 :					// j8's are always 2 bytes.
