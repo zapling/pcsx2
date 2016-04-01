@@ -24,6 +24,7 @@
 #include "GSRenderer.h"
 #include "GSDirtyRect.h"
 
+//#define USE_VECTOR_LIST
 
 template<typename T>
 class VectorList
@@ -246,7 +247,11 @@ public:
 	{
 	public:
 		hash_set<Source*> m_surfaces;
+#ifdef USE_VECTOR_LIST
+		VectorList<Source*> m_map[MAX_PAGES];
+#else
 		list<Source*> m_map[MAX_PAGES];
+#endif
 		uint32 m_pages[16]; // bitmap of all pages
 		bool m_used;
 
@@ -261,7 +266,11 @@ public:
 protected:
 	GSRenderer* m_renderer;
 	SourceMap m_src;
+#ifdef USE_VECTOR_LIST
+	VectorList<Target*> m_dst[2];
+#else
 	list<Target*> m_dst[2];
+#endif
 	bool m_paltex;
 	int m_spritehack;
 	bool m_preload_frame;

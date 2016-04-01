@@ -102,7 +102,11 @@ GSTextureCache::Source* GSTextureCache::LookupSource(const GIFRegTEX0& TEX0, con
 	auto& m = m_src.m_map[TEX0.TBP0 >> 5];
 
 
+#ifdef USE_VECTOR_LIST
+	for(auto i = m.rbegin(); i != m.rend(); i++)
+#else
 	for(auto i = m.begin(); i != m.end(); i++)
+#endif
 	{
 		Source* s = *i;
 
@@ -124,7 +128,11 @@ GSTextureCache::Source* GSTextureCache::LookupSource(const GIFRegTEX0& TEX0, con
 				continue;
 		}
 
+#ifdef USE_VECTOR_LIST
+		m.move_first(i);
+#else
 		m.splice(m.begin(), m, i);
+#endif
 
 		src = s;
 
@@ -149,7 +157,11 @@ GSTextureCache::Source* GSTextureCache::LookupSource(const GIFRegTEX0& TEX0, con
 		// (Simply not doing this code at all makes a lot of previsouly missing stuff show (but breaks pretty much everything
 		// else.)
 
+#ifdef USE_VECTOR_LIST
+		for(auto i = m_dst[RenderTarget].rbegin(); i != m_dst[RenderTarget].rend(); i++)
+#else
 		for(auto i = m_dst[RenderTarget].begin(); i != m_dst[RenderTarget].end(); i++)
+#endif
 		{
 			Target* t = *i;
 
@@ -204,7 +216,11 @@ GSTextureCache::Source* GSTextureCache::LookupSource(const GIFRegTEX0& TEX0, con
 			// Unfortunately, I don't have any Arc the Lad testcase
 			//
 			// 1/ Check only current frame, I guess it is only used as a postprocessing effect
+#ifdef USE_VECTOR_LIST
+			for(auto i = m_dst[DepthStencil].rbegin(); i != m_dst[DepthStencil].rend(); i++) {
+#else
 			for(auto i = m_dst[DepthStencil].begin(); i != m_dst[DepthStencil].end(); i++) {
+#endif
 				Target* t = *i;
 
 				if(!t->m_age && t->m_used && t->m_dirty.empty() && GSUtil::HasSharedBits(bp, psm, t->m_TEX0.TBP0, t->m_TEX0.PSM))
@@ -264,13 +280,21 @@ GSTextureCache::Target* GSTextureCache::LookupTarget(const GIFRegTEX0& TEX0, int
 
 	Target* dst = NULL;
 
+#ifdef USE_VECTOR_LIST
+	for(auto i = m_dst[type].rbegin(); i != m_dst[type].rend(); i++)
+#else
 	for(auto i = m_dst[type].begin(); i != m_dst[type].end(); i++)
+#endif
 	{
 		Target* t = *i;
 
 		if(bp == t->m_TEX0.TBP0)
 		{
+#ifdef USE_VECTOR_LIST
+			m_dst[type].move_first(i);
+#else
 			m_dst[type].splice(m_dst[type].begin(), m_dst[type], i);
+#endif
 
 			dst = t;
 
@@ -297,7 +321,11 @@ GSTextureCache::Target* GSTextureCache::LookupTarget(const GIFRegTEX0& TEX0, int
 		// Depth stencil/RT can be an older RT/DS but only check recent RT/DS to avoid to pick
 		// some bad data.
 
+#ifdef USE_VECTOR_LIST
+		for(auto i = m_dst[rev_type].rbegin(); i != m_dst[rev_type].rend(); i++)
+#else
 		for(auto i = m_dst[rev_type].begin(); i != m_dst[rev_type].end(); i++)
+#endif
 		{
 			Target* t = *i;
 
