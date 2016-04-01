@@ -1721,11 +1721,8 @@ void GSTextureCache::SourceMap::RemoveAt(Source* s)
 	{
 		auto& m = m_map[start];
 
-		for(auto i = m.begin(); i != m.end(); )
-		{
-			auto j = i++;
-
-			if(*j == s) {m.erase(j); break;}
+		for(auto i = m.begin(); i != m.end(); ++i) {
+			if(*i == s) {m.erase(i); break;}
 		}
 	}
 
