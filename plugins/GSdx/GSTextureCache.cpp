@@ -57,11 +57,11 @@ void GSTextureCache::RemovePartial()
 {
 	//m_src.RemoveAll();
 
-	for (int type = 0; type < 2; type++)
+	for (auto & type : m_dst)
 	{
-		for_each(m_dst[type].begin(), m_dst[type].end(), delete_object());
+		for_each(type.begin(), type.end(), delete_object());
 
-		m_dst[type].clear();
+		type.clear();
 	}
 }
 
@@ -69,11 +69,11 @@ void GSTextureCache::RemoveAll()
 {
 	m_src.RemoveAll();
 
-	for(int type = 0; type < 2; type++)
+	for(auto & type : m_dst)
 	{
-		for_each(m_dst[type].begin(), m_dst[type].end(), delete_object());
+		for_each(type.begin(), type.end(), delete_object());
 
-		m_dst[type].clear();
+		type.clear();
 	}
 }
 
@@ -149,7 +149,7 @@ GSTextureCache::Source* GSTextureCache::LookupSource(const GIFRegTEX0& TEX0, con
 		// (Simply not doing this code at all makes a lot of previsouly missing stuff show (but breaks pretty much everything
 		// else.)
 
-		for(list<Target*>::iterator i = m_dst[RenderTarget].begin(); i != m_dst[RenderTarget].end(); i++)
+		for(auto i = m_dst[RenderTarget].begin(); i != m_dst[RenderTarget].end(); i++)
 		{
 			Target* t = *i;
 
@@ -204,7 +204,7 @@ GSTextureCache::Source* GSTextureCache::LookupSource(const GIFRegTEX0& TEX0, con
 			// Unfortunately, I don't have any Arc the Lad testcase
 			//
 			// 1/ Check only current frame, I guess it is only used as a postprocessing effect
-			for(list<Target*>::iterator i = m_dst[DepthStencil].begin(); i != m_dst[DepthStencil].end(); i++) {
+			for(auto i = m_dst[DepthStencil].begin(); i != m_dst[DepthStencil].end(); i++) {
 				Target* t = *i;
 
 				if(!t->m_age && t->m_used && t->m_dirty.empty() && GSUtil::HasSharedBits(bp, psm, t->m_TEX0.TBP0, t->m_TEX0.PSM))
@@ -297,7 +297,7 @@ GSTextureCache::Target* GSTextureCache::LookupTarget(const GIFRegTEX0& TEX0, int
 		// Depth stencil/RT can be an older RT/DS but only check recent RT/DS to avoid to pick
 		// some bad data.
 
-		for(list<Target*>::iterator i = m_dst[rev_type].begin(); i != m_dst[rev_type].end(); i++)
+		for(auto i = m_dst[rev_type].begin(); i != m_dst[rev_type].end(); i++)
 		{
 			Target* t = *i;
 
@@ -416,10 +416,8 @@ GSTextureCache::Target* GSTextureCache::LookupTarget(const GIFRegTEX0& TEX0, int
 
 	Target* dst = NULL;
 
-	for(list<Target*>::iterator i = m_dst[RenderTarget].begin(); i != m_dst[RenderTarget].end(); i++)
+	for(auto t : m_dst[RenderTarget])
 	{
-		Target* t = *i;
-
 		if(bp == t->m_TEX0.TBP0)
 		{
 			dst = t;
@@ -588,9 +586,9 @@ void GSTextureCache::InvalidateVideoMem(GSOffset* off, const GSVector4i& rect, b
 							// Note: very hot path on snowbling engine game
 							vector<GSVector2i>& l = s->m_p2t[page];
 
-							for(vector<GSVector2i>::iterator k = l.begin(); k != l.end(); k++)
+							for(auto & k : l)
 							{
-								valid[k->x] &= k->y;
+								valid[k.x] &= k.y;
 							}
 						}
 						else
@@ -1230,8 +1228,7 @@ void GSTextureCache::PrintMemoryUsage()
 	uint32 tex_rt = 0;
 	uint32 rt     = 0;
 	uint32 dss    = 0;
-	for(hash_set<Source*>::iterator i = m_src.m_surfaces.begin(); i != m_src.m_surfaces.end(); i++) {
-		Source* s = *i;
+	for(auto s : m_src.m_surfaces) {
 		if (s) {
 			if (s->m_target)
 				tex_rt += s->m_texture->GetMemUsage();
@@ -1240,13 +1237,11 @@ void GSTextureCache::PrintMemoryUsage()
 
 		}
 	}
-	for(list<Target*>::iterator i = m_dst[RenderTarget].begin(); i != m_dst[RenderTarget].end(); i++) {
-		Target* t = *i;
+	for(auto t : m_dst[RenderTarget]) {
 		if (t)
 			rt += t->m_texture->GetMemUsage();
 	}
-	for(list<Target*>::iterator i = m_dst[DepthStencil].begin(); i != m_dst[DepthStencil].end(); i++) {
-		Target* t = *i;
+	for(auto t : m_dst[DepthStencil]) {
 		if (t)
 			dss += t->m_texture->GetMemUsage();
 	}
@@ -1679,9 +1674,9 @@ void GSTextureCache::SourceMap::RemoveAll()
 
 	m_surfaces.clear();
 
-	for(size_t i = 0; i < countof(m_map); i++)
+	for(auto & i : m_map)
 	{
-		m_map[i].clear();
+		i.clear();
 	}
 }
 
