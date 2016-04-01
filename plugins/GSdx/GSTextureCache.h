@@ -24,7 +24,7 @@
 #include "GSRenderer.h"
 #include "GSDirtyRect.h"
 
-//#define USE_VECTOR_LIST
+#define USE_VECTOR_LIST
 
 template<typename T>
 class VectorList
