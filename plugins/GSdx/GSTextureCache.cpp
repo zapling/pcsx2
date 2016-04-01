@@ -99,10 +99,10 @@ GSTextureCache::Source* GSTextureCache::LookupSource(const GIFRegTEX0& TEX0, con
 
 	Source* src = NULL;
 
-	list<Source*>& m = m_src.m_map[TEX0.TBP0 >> 5];
+	auto& m = m_src.m_map[TEX0.TBP0 >> 5];
 
 
-	for(list<Source*>::iterator i = m.begin(); i != m.end(); i++)
+	for(auto i = m.begin(); i != m.end(); i++)
 	{
 		Source* s = *i;
 
@@ -264,7 +264,7 @@ GSTextureCache::Target* GSTextureCache::LookupTarget(const GIFRegTEX0& TEX0, int
 
 	Target* dst = NULL;
 
-	for(list<Target*>::iterator i = m_dst[type].begin(); i != m_dst[type].end(); i++)
+	for(auto i = m_dst[type].begin(); i != m_dst[type].end(); i++)
 	{
 		Target* t = *i;
 
@@ -480,7 +480,7 @@ void GSTextureCache::InvalidateVideoMemType(int type, uint32 bp)
 	if (!CanConvertDepth())
 		return;
 
-	for(list<Target*>::iterator i = m_dst[type].begin(); i != m_dst[type].end(); i++)
+	for(auto i = m_dst[type].begin(); i != m_dst[type].end(); i++)
 	{
 		Target* t = *i;
 
@@ -513,11 +513,11 @@ void GSTextureCache::InvalidateVideoMem(GSOffset* off, const GSVector4i& rect, b
 	{
 		// Remove Source that have same BP as the render target (color&dss)
 		// rendering will dirty the copy
-		const list<Source*>& m = m_src.m_map[bp >> 5];
+		const auto& m = m_src.m_map[bp >> 5];
 
-		for(list<Source*>::const_iterator i = m.begin(); i != m.end(); )
+		for(auto i = m.begin(); i != m.end(); )
 		{
-			list<Source*>::const_iterator j = i++;
+			auto j = i++;
 
 			Source* s = *j;
 
@@ -533,11 +533,11 @@ void GSTextureCache::InvalidateVideoMem(GSOffset* off, const GSVector4i& rect, b
 			// Target Page (8KB) have always a width of 64 pixels
 			// Half of the Target is TBW/2 pages * 8KB / (1 block * 256B) = 0x10
 
-			const list<Source*>& m = m_src.m_map[bbp >> 5];
+			const auto& m = m_src.m_map[bbp >> 5];
 
-			for(list<Source*>::const_iterator i = m.begin(); i != m.end(); )
+			for(auto i = m.begin(); i != m.end(); )
 			{
-				list<Source*>::const_iterator j = i++;
+				auto j = i++;
 
 				Source* s = *j;
 
@@ -561,11 +561,11 @@ void GSTextureCache::InvalidateVideoMem(GSOffset* off, const GSVector4i& rect, b
 	{
 		uint32 page = *p;
 
-		const list<Source*>& m = m_src.m_map[page];
+		const auto& m = m_src.m_map[page];
 
-		for(list<Source*>::const_iterator i = m.begin(); i != m.end(); )
+		for(auto i = m.begin(); i != m.end(); )
 		{
-			list<Source*>::const_iterator j = i++;
+			auto j = i++;
 
 			Source* s = *j;
 
@@ -619,9 +619,9 @@ void GSTextureCache::InvalidateVideoMem(GSOffset* off, const GSVector4i& rect, b
 
 	for(int type = 0; type < 2; type++)
 	{
-		for(list<Target*>::iterator i = m_dst[type].begin(); i != m_dst[type].end(); )
+		for(auto i = m_dst[type].begin(); i != m_dst[type].end(); )
 		{
-			list<Target*>::iterator j = i++;
+			auto j = i++;
 
 			Target* t = *j;
 
@@ -722,9 +722,9 @@ void GSTextureCache::InvalidateLocalMem(GSOffset* off, const GSVector4i& r)
 	// It works for all the games mentioned below and fixes a couple of other ones as well
 	// (Busen0: Wizardry and Chaos Legion).
 	// Also in a few games the below code ran the Grandia3 case when it shouldn't :p
-	for(list<Target*>::iterator i = m_dst[RenderTarget].begin(); i != m_dst[RenderTarget].end(); )
+	for(auto i = m_dst[RenderTarget].begin(); i != m_dst[RenderTarget].end(); )
 	{
-		list<Target*>::iterator j = i++;
+		auto j = i++;
 
 		Target* t = *j;
 
@@ -756,9 +756,9 @@ void GSTextureCache::InvalidateLocalMem(GSOffset* off, const GSVector4i& r)
 
 	//GSTextureCache::Target* rt2 = NULL;
 	//int ymin = INT_MAX;
-	//for(list<Target*>::iterator i = m_dst[RenderTarget].begin(); i != m_dst[RenderTarget].end(); )
+	//for(auto i = m_dst[RenderTarget].begin(); i != m_dst[RenderTarget].end(); )
 	//{
-	//	list<Target*>::iterator j = i++;
+	//	auto j = i++;
 
 	//	Target* t = *j;
 
@@ -829,9 +829,9 @@ void GSTextureCache::IncAge()
 	int maxage = m_src.m_used ? 3 : 30;
 
 	// You can't use m_map[page] because Source* are duplicated on several pages.
-	for(hash_set<Source*>::iterator i = m_src.m_surfaces.begin(); i != m_src.m_surfaces.end(); )
+	for(auto i = m_src.m_surfaces.begin(); i != m_src.m_surfaces.end(); )
 	{
-		hash_set<Source*>::iterator j = i++;
+		auto j = i++;
 
 		Source* s = *j;
 
@@ -851,9 +851,9 @@ void GSTextureCache::IncAge()
 
 	for(int type = 0; type < 2; type++)
 	{
-		for(list<Target*>::iterator i = m_dst[type].begin(); i != m_dst[type].end(); )
+		for(auto i = m_dst[type].begin(); i != m_dst[type].end(); )
 		{
-			list<Target*>::iterator j = i++;
+			auto j = i++;
 
 			Target* t = *j;
 
@@ -1654,7 +1654,7 @@ void GSTextureCache::SourceMap::Add(Source* s, const GIFRegTEX0& TEX0, const GSO
 		{
 			m_pages[i] = 0;
 
-			list<Source*>* m = &m_map[i << 5];
+			auto* m = &m_map[i << 5];
 
 			unsigned long j;
 
@@ -1691,11 +1691,11 @@ void GSTextureCache::SourceMap::RemoveAt(Source* s)
 	// Source (except render target) is duplicated for each page they use.
 	for(size_t start = s->m_TEX0.TBP0 >> 5, end = s->m_target ? start : countof(m_map) - 1; start <= end; start++)
 	{
-		list<Source*>& m = m_map[start];
+		auto& m = m_map[start];
 
-		for(list<Source*>::iterator i = m.begin(); i != m.end(); )
+		for(auto i = m.begin(); i != m.end(); )
 		{
-			list<Source*>::iterator j = i++;
+			auto j = i++;
 
 			if(*j == s) {m.erase(j); break;}
 		}
