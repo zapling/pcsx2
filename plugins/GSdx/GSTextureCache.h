@@ -24,6 +24,158 @@
 #include "GSRenderer.h"
 #include "GSDirtyRect.h"
 
+
+template<typename T>
+class VectorList
+{
+	public:
+
+	class iterator
+	{
+		T* m_ptr;
+
+		public:
+		iterator(T* ptr) : m_ptr(ptr) {}
+		iterator& operator++()   { ++m_ptr; return *this; }
+		iterator operator++(int) { iterator me(*this); ++m_ptr; return me; }
+		iterator& operator--()   { --m_ptr; return *this; }
+		iterator operator--(int) { iterator me(*this); --m_ptr; return me; }
+		T& operator*()  const { return *m_ptr; }
+		T* operator->() const { return m_ptr; }
+		bool operator==(const iterator& rhs) const { return m_ptr == rhs.m_ptr; }
+		bool operator!=(const iterator& rhs) const { return m_ptr != rhs.m_ptr; }
+	};
+
+	class const_iterator
+	{
+		T* m_ptr;
+
+		public:
+		const_iterator(T* ptr) : m_ptr(ptr) {}
+		const_iterator& operator++()   { ++m_ptr; return *this; }
+		const_iterator operator++(int) { const_iterator me(*this); ++m_ptr; return me; }
+		const_iterator& operator--()   { --m_ptr; return *this; }
+		const_iterator operator--(int) { const_iterator me(*this); --m_ptr; return me; }
+		const T& operator*()  const { return *m_ptr; }
+		const T* operator->() const { return m_ptr; }
+		bool operator==(const const_iterator& rhs) const { return m_ptr == rhs.m_ptr; }
+		bool operator!=(const const_iterator& rhs) const { return m_ptr != rhs.m_ptr; }
+	};
+
+	class reverse_iterator
+	{
+		T* m_ptr;
+
+		public:
+		reverse_iterator(T* ptr) : m_ptr(ptr) {}
+		reverse_iterator& operator++()   { --m_ptr; return *this; }
+		reverse_iterator operator++(int) { reverse_iterator me(*this); --m_ptr; return me; }
+		reverse_iterator& operator--()   { ++m_ptr; return *this; }
+		reverse_iterator operator--(int) { reverse_iterator me(*this); ++m_ptr; return me; }
+		T& operator*()  const { return *m_ptr; }
+		T* operator->() const { return m_ptr; }
+		bool operator==(const reverse_iterator& rhs) const { return m_ptr == rhs.m_ptr; }
+		bool operator!=(const reverse_iterator& rhs) const { return m_ptr != rhs.m_ptr; }
+	};
+
+
+	T* m_storage;
+	size_t m_end;
+	size_t m_start;
+	size_t m_capacity;
+
+	void do_realloc() {
+		size_t size = m_end - m_start;
+		if (size < (m_capacity / 2)) {
+			// Repack the data at the beginning of the storage
+			// TODO maybe we can force some data alignment
+			memcpy(m_storage, &m_storage[m_start], size * sizeof(T));
+		} else {
+			m_capacity *= 2;
+			T* m_temp = (T*)_aligned_malloc(m_capacity * sizeof(T), 32);
+			memcpy(m_temp, &m_storage[m_start], size * sizeof(T));
+			_aligned_free(m_storage);
+			m_storage = m_temp;
+		}
+		m_start = 0;
+		m_end = size;
+	}
+
+	public:
+	VectorList() {
+		m_capacity = 512;
+		m_storage  = (T*)_aligned_malloc(m_capacity * sizeof(T), 32);
+		m_start    = 0;
+		m_end      = 0;
+	}
+
+	~VectorList() {
+		_aligned_free(m_storage);
+	}
+
+	inline iterator begin() const {
+		return iterator(m_storage + m_start);
+	}
+
+	inline iterator end() const {
+		return iterator(m_storage + m_end);
+	}
+
+	inline reverse_iterator rbegin() const {
+		return reverse_iterator(m_storage + m_end - 1);
+	}
+
+	inline reverse_iterator rend() const {
+		return reverse_iterator(m_storage + m_start - 1);
+	}
+
+	inline const_iterator cbegin() const {
+		return const_iterator(m_storage + m_start);
+	}
+
+	inline const_iterator cend() const {
+		return const_iterator(m_storage + m_end);
+	}
+
+	void push_front(T e) {
+		if (m_end >= m_capacity) {
+			do_realloc();
+		}
+		m_storage[m_end] = e;
+		m_end++;
+	}
+
+	inline void erase(iterator position) {
+		*position = m_storage[m_start];
+		m_start++;
+	}
+
+	inline void erase(reverse_iterator position) {
+		*position = m_storage[m_start];
+		m_start++;
+	}
+
+	inline void move_first(iterator position) {
+		T e = *position;
+		erase(position);
+		// iterator could be invalidated after a push_front
+		push_front(e);
+	}
+
+	inline void move_first(reverse_iterator position) {
+		T e = *position;
+		erase(position);
+		// iterator could be invalidated after a push_front
+		push_front(e);
+	}
+
+	void clear() {
+		// FIXME do I need to delete element?
+		m_start = m_end = 0;
+	}
+
+};
+
 class GSTextureCache
 {
 public:

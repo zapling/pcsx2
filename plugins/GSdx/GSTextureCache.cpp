@@ -515,7 +515,7 @@ void GSTextureCache::InvalidateVideoMem(GSOffset* off, const GSVector4i& rect, b
 		// rendering will dirty the copy
 		const auto& m = m_src.m_map[bp >> 5];
 
-		for(auto i = m.begin(); i != m.end(); )
+		for(auto i = m.cbegin(); i != m.cend(); )
 		{
 			auto j = i++;
 
@@ -535,7 +535,7 @@ void GSTextureCache::InvalidateVideoMem(GSOffset* off, const GSVector4i& rect, b
 
 			const auto& m = m_src.m_map[bbp >> 5];
 
-			for(auto i = m.begin(); i != m.end(); )
+			for(auto i = m.cbegin(); i != m.cend(); )
 			{
 				auto j = i++;
 
@@ -563,7 +563,7 @@ void GSTextureCache::InvalidateVideoMem(GSOffset* off, const GSVector4i& rect, b
 
 		const auto& m = m_src.m_map[page];
 
-		for(auto i = m.begin(); i != m.end(); )
+		for(auto i = m.cbegin(); i != m.cend(); )
 		{
 			auto j = i++;
 
