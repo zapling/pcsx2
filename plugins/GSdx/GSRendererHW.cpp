@@ -468,6 +468,11 @@ void GSRendererHW::Draw()
 	TEX0.TBP0 = context->FRAME.Block();
 	TEX0.TBW = context->FRAME.FBW;
 	TEX0.PSM = context->FRAME.PSM;
+	// Berserk uses a 32 bits format with alpha masked. The alpha layer
+	// contains a separate texture (the HUD). Set the format to 24 bits so the
+	// texture cache will keep the alpha channel separated from the framebuffer
+	if (context->FRAME.PSM == PSM_PSMCT32 && (fm & 0xFF000000) == 0xFF000000)
+		TEX0.PSM = PSM_PSMCT24;
 
 	GSTextureCache::Target* rt = NULL;
 	GSTexture* rt_tex = NULL;
